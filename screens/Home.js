@@ -28,9 +28,11 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchNotes();
-    // return () => fetchNotes();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchNotes();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const handleAddNote = () => {
     navigation.navigate('CreateNote');
@@ -43,6 +45,7 @@ const Home = () => {
   return (
     <View style={[styles.container]}>
       <Header
+        back={true}
         addOnPress={() => handleAddNote()}
         archiveOnPress={() => handleArchived()}
         archive={true}

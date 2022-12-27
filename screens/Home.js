@@ -14,6 +14,7 @@ import {apiPath} from '../App';
 
 const Home = () => {
   const [notes, setNotes] = useState([]);
+  const [timeout, setTimeou] = useState(false);
   const navigation = useNavigation();
 
   const fetchNotes = () => {
@@ -42,6 +43,10 @@ const Home = () => {
     navigation.navigate('Archived', notes);
   };
 
+  setTimeout(() => {
+    setTimeou(true);
+  }, 10000);
+
   return (
     <View style={[styles.container]}>
       <Header
@@ -68,7 +73,7 @@ const Home = () => {
                 fontSize: 20,
                 fontWeight: '700',
               }}>
-              Loading...
+              {timeout ? "Something went wrong. No notes found" : "Loading..."}
             </Text>
           </View>
         )}

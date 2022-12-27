@@ -5,28 +5,79 @@ import {
   StatusBar,
   TextInput,
   TouchableOpacity,
+  Image
 } from 'react-native';
 import React, {useState} from 'react';
-import { useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import axios from 'axios';
+import { apiPath } from '../App';
 
 const EditNoteScreen = () => {
-  const data = useRoute().params
-
-  console.log(data);
+  const data = useRoute().params;
+  const navigation = useNavigation()
 
   const [title, setTitle] = useState(data.name);
   const [description, setDescription] = useState(data.description);
 
+  const postNote = dataToPost => {
+    axios({
+      method: 'patch',
+      responseType: 'json',
+      url: `${apiPath}/records/${data.id}`,
+      data: dataToPost,
+    })
+      .then(response => {
+        console.log(response);
+        alert('Note saved')
+      })
+      .catch(error => {
+        console.log(error);
+        alert('Something went wrong')
+      });
+  };
 
-  const handleOnSave = () => {};
+  const handleOnSave = () => {
+    const date = new Date();
+    let finaldata = {
+      name: title,
+      description: description,
+      updatedAt: date.toISOString(),
+    };
+
+    postNote(finaldata);
+  };
+
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <TextInput
-          style={[styles.headerTitle]}
-          value={title}
-          onChangeText={e => setTitle(e)}
-        />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
+            style={{
+              marginRight: 20,
+            }}
+            onPress={() => {
+              navigation.goBack();
+            }}>
+            <Image
+              style={{
+                tintColor: 'white',
+                width: 40,
+                height: 20,
+              }}
+              source={require('../assets/icons/go_back.png')}
+            />
+          </TouchableOpacity>
+          <TextInput
+            style={[styles.headerTitle]}
+            value={title}
+            onChangeText={e => setTitle(e)}
+          />
+        </View>
         <TouchableOpacity onPress={() => handleOnSave()}>
           <Text
             style={{
@@ -88,5 +139,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 30,
+    width: 250
   },
 });

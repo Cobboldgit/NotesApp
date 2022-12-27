@@ -1,5 +1,6 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
+import {useNavigation} from '@react-navigation/native';
 
 const Header = ({
   title,
@@ -10,11 +11,38 @@ const Header = ({
   archive,
   archiveOnPress,
   editOnPress,
-  menuOnPress
+  menuOnPress,
+  back = false,
 }) => {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.headerContainer}>
-      <Text style={styles.headerTitle}>{title}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        {back !== true && (
+          <TouchableOpacity
+            style={{
+              marginRight: 20,
+            }}
+            onPress={() => {
+              navigation.goBack();
+            }}>
+            <Image
+              style={{
+                tintColor: 'white',
+                width: 40,
+                height: 20,
+              }}
+              source={require('../assets/icons/go_back.png')}
+            />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.headerTitle}>{title}</Text>
+      </View>
       <View
         style={{
           flexDirection: 'row',

@@ -6,14 +6,19 @@ import {
   ScrollView,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  Modal,
+  TextInput,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Header from '../components/Header';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import axios from 'axios';
+import {apiPath} from '../App';
 
 const CardDetails = () => {
   const [showMenu, setShowMenu] = useState(false);
+  const [priority, setPriority] = useState('2');
+  const [modalVisible, setModalVisible] = useState(false);
   const data = useRoute().params;
   const navigation = useNavigation();
 
@@ -33,9 +38,167 @@ const CardDetails = () => {
     navigation.navigate('Info', data);
   };
 
-  const handleAcrchiveOnPress = () => {};
+  const handleAcrchiveOnPress = () => {
+    const date = new Date();
 
-  const handleDeleteOnPress = () => {};
+    const dataToUpdate = {
+      updatedAt: date.toISOString(),
+      archived: data.archived == true ? false : true,
+    };
+
+    axios({
+      method: 'patch',
+      responseType: 'json',
+      url: `${apiPath}/records/${data.id}`,
+      data: dataToUpdate,
+    }).then(() => {
+      setShowMenu(false);
+    });
+  };
+
+  const handleDeleteOnPress = () => {
+    const date = new Date();
+
+    axios({
+      method: 'delete',
+      responseType: 'json',
+      url: `${apiPath}/records/${data.id}`,
+    }).then(() => {
+      setShowMenu(false);
+      navigation.goBack();
+    });
+  };
+
+  const handleShowModal = () => {
+    setShowMenu(!showMenu);
+    setModalVisible(!modalVisible);
+  };
+
+  const handleSetPriority = () => {
+    const date = new Date();
+
+    const dataToUpdate = {
+      updatedAt: date.toISOString(),
+      priority: parseInt(priority),
+    };
+
+    axios({
+      method: 'patch',
+      responseType: 'json',
+      url: `${apiPath}/records/${data.id}`,
+      data: dataToUpdate,
+    }).then(() => {
+      setShowMenu(false);
+      setModalVisible(false);
+    });
+  };
+
+  const modal = () => {
+    return (
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        statusBarTranslucent
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+        style={{
+          flex: 1,
+        }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: `rgba(0,0,0,0.2)`,
+          }}>
+          <View
+            style={{
+              width: 300,
+              height: 170,
+              backgroundColor: '#fff',
+              elevation: 20,
+              borderRadius: 10,
+              padding: 20,
+            }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                color: '#000',
+                fontSize: 18,
+                fontWeight: '700',
+              }}>
+              Set note priority
+            </Text>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'space-between',
+              }}>
+              <TextInput
+                value={priority}
+                onChangeText={e => setPriority(e)}
+                style={{
+                  color: '#000',
+                  fontSize: 20,
+                  height: 50,
+                }}
+                placeholderTextColor={'gray'}
+                placeholder="Default is 2"
+              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}>
+                <TouchableOpacity
+                  onPress={() => handleSetPriority()}
+                  style={{
+                    backgroundColor: '#d86f1c',
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 50,
+                    flex: 1,
+                    marginRight: 3,
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 16,
+                    }}>
+                    Set
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setPriority(2);
+                    setModalVisible(!modalVisible);
+                  }}
+                  style={{
+                    backgroundColor: '#d86f1c',
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 50,
+                    flex: 1,
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 16,
+                    }}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -58,7 +221,7 @@ const CardDetails = () => {
         />
 
         {/* meanu  */}
-
+        {modal()}
         {showMenu && (
           <View
             style={{
@@ -71,7 +234,7 @@ const CardDetails = () => {
             <View
               style={{
                 position: 'absolute',
-                height: 100,
+                height: 200,
                 width: 150,
                 backgroundColor: 'white',
                 right: 30,
@@ -110,7 +273,23 @@ const CardDetails = () => {
                     fontSize: 20,
                     color: '#000',
                   }}>
-                  Archive
+                  {data.archived == true ? 'Unarchive' : 'Archive'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleShowModal()}
+                style={{
+                  borderBottomColor: '#e6e6e6',
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                  flex: 1,
+                  justifyContent: 'center',
+                }}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    color: '#000',
+                  }}>
+                  Set priority
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
